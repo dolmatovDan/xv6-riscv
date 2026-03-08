@@ -29,6 +29,11 @@ main(int argc, char *argv[]) {
     str_len++;
   }
 
+  if (n < 0) {
+    fprintf(2, "add: invalid read to buffer\n");
+    exit(1);
+  }
+
   buf[str_len] = '\0';
 
   if (first_space == -1 || first_space == 0) {

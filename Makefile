@@ -94,6 +94,9 @@ $K/kernel: $(OBJS) $K/kernel.ld
 $K/%.o: $K/%.S
 	$(CC) -march=rv64gc -g -c -o $@ $<
 
+$U/%.o: $U/%.S
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 tags: $(OBJS)
 	etags kernel/*.S kernel/*.c
 
@@ -115,10 +118,6 @@ $U/_forktest: $U/forktest.o $(ULIB)
 	# in order to be able to max out the proc table.
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $U/_forktest $U/forktest.o $U/ulib.o $U/usys.o
 	$(OBJDUMP) -S $U/_forktest > $U/forktest.asm
-
-$U/_add_asm: $U/add_asm.S $(ULIB)
-	$(CC) $(CFLAGS) -c -o $U/add_asm.o $U/add_asm.S
-	$(LD) $(LDFLAGS) -T $U/user.ld -o $U/_add_asm $U/add_asm.o $(ULIB)
 
 
 mkfs/mkfs: mkfs/mkfs.c $K/fs.h $K/param.h
