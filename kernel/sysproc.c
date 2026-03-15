@@ -131,17 +131,17 @@ uint64 sys_ps_listinfo(void) {
 
     struct procinfo cur_proc_info;
     cur_proc_info.pid = p->pid;
-    safestrcpy(cur_proc_info.name, p->name, 16);
+    safestrcpy(cur_proc_info.name, p->name, sizeof(cur_proc_info.name));
     cur_proc_info.state = p->state;
     release(&p->lock);
 
     acquire(&wait_lock);
     if (p->parent) {
       cur_proc_info.ppid = p->parent->pid;
-      safestrcpy(cur_proc_info.pname, p->parent->name, 16);
+      safestrcpy(cur_proc_info.pname, p->parent->name, sizeof(cur_proc_info.pname));
     } else {
       cur_proc_info.ppid = 0;
-      safestrcpy(cur_proc_info.pname, "", 16);
+      safestrcpy(cur_proc_info.pname, "", sizeof(cur_proc_info.pname));
     }
     release(&wait_lock);
 
