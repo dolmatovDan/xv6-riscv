@@ -11,6 +11,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   char buf[256];
+  int buf_size = sizeof(buf);
   int buf_end = 0;
 
   int pid = fork();
@@ -39,8 +40,13 @@ int main(int argc, char *argv[]) {
     }
 
     int n;
-    while ((n = read(0, buf + buf_end, sizeof(buf) - buf_end)) > 0) {
+    while ((n = read(0, buf + buf_end, buf_size - buf_end)) > 0) {
       buf_end += n;
+    }
+
+    if (n < 0) {
+      fprintf(stderr, "fail to read from buf\n");
+      return 1;
     }
 
     err = close(0);
@@ -49,12 +55,7 @@ int main(int argc, char *argv[]) {
       return 1;
     }
 
-    if (n < 0) {
-      fprintf(stderr, "fail to read from buf\n");
-      return 1;
-    }
-
-    if (buf_end >= sizeof(buf)) {
+    if (buf_end >= buf_size) {
       buf_end--;
     }
 
@@ -72,12 +73,12 @@ int main(int argc, char *argv[]) {
 
     for (int i = 1; i < argc; ++i) {
       int arg_len = strlen(argv[i]);
-      if (buf_end + arg_len + 1 > sizeof(buf)) {
+      if (buf_end + arg_len + 1 > buf_size) {
         fprintf(stderr, "to many arguments\n");
         return 1;
       }
 
-      strcpy(buf + buf_end, argv[i]);
+      memcpy(buf + buf_end, argv[i], arg_len);
       buf_end += arg_len;
       buf[buf_end++] = '\n';
     }

@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
         exit(1);
       }
 
-      strcpy(buf + buf_end, argv[i]);
+      memcpy(buf + buf_end, argv[i], arg_len);
       buf_end += arg_len;
       buf[buf_end++] = '\n';
     }
