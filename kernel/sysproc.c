@@ -127,16 +127,18 @@ uint64 sys_ps_listinfo(void) {
     safestrcpy(cur_proc_info.name, p->name, 16);
     cur_proc_info.state = p->state;
 
+    struct proc* parent = p->parent;
+    release(&p->lock);
+
     acquire(&wait_lock);
-    if (p->parent) {
-      cur_proc_info.ppid = p->parent->pid;
-      safestrcpy(cur_proc_info.pname, p->parent->name, 16);
+    if (parent) {
+      cur_proc_info.ppid = parent->pid;
+      safestrcpy(cur_proc_info.pname, parent->name, 16);
     } else {
       cur_proc_info.ppid = 0;
       safestrcpy(cur_proc_info.pname, "", 16);
     }
     release(&wait_lock);
-    release(&p->lock);
 
     int err = copyout(dst_p->pagetable, (uint64)plist, (char *)&cur_proc_info,
                       sizeof(cur_proc_info));

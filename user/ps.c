@@ -4,7 +4,7 @@
 char* 
 wrap_string(char *s, int n)
 {
-  char *ret = malloc(n);
+  char *ret = malloc(n + 1);
   if (ret == 0)
     return s;
   int len = strlen(s);
@@ -15,23 +15,25 @@ wrap_string(char *s, int n)
       ret[i] = s[i - (n - len)];
     }
   }
+  ret[n] = '\0';
   return ret;
 }
 
 int
-main(int argc, char argv[])
+main(int argc, char *argv[])
 {
   int lim = 1;
   struct procinfo *plist = malloc(lim * sizeof(*plist));
   int cnt_proc = -1;
   while (plist && ((cnt_proc = ps_listinfo(plist, lim)) == -2)) {
-    if (cnt_proc == -1) {
-      fprintf(2, "fail to list info\n");
-      exit(-1);
-    }
     free(plist);
     lim *= 2;
     plist = malloc(lim * sizeof(*plist));
+  }
+
+  if (cnt_proc == -1) {
+    fprintf(2, "fail to list info\n");
+    exit(-1);
   }
 
   printf("cnt_proc: %d\n", cnt_proc);
@@ -41,11 +43,12 @@ main(int argc, char argv[])
     char* wrapped_pname = wrap_string(p->pname, 6);
     printf("       %d   %s         %d        %d     %s\n", p->pid, wrapped_name, p->state, p->ppid, wrapped_pname);
 
-    if (p->name != wrapped_pname)
+    if (p->pname != wrapped_pname)
       free(wrapped_pname);
     if (p->name != wrapped_name)
       free(wrapped_name);
   }
+  free(plist);
 
   exit(0);
 }

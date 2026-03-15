@@ -26,9 +26,11 @@ main(int argc, char *argv[])
   }
   int cnt_proc = 0;
   if ((cnt_proc = ps_listinfo(plist, lim)) == -1) {
+    free(plist);
     fprintf(2, "ps_listinfo should write correctly\n");
     exit(-1);
   }
+  free(plist);
 
   struct procinfo *p = plist;
   for (int i = 0; i < cnt_proc; ++i) {
@@ -40,8 +42,10 @@ main(int argc, char *argv[])
   plist = malloc(lim * sizeof(*plist));
   if ((cnt_proc = ps_listinfo(plist, lim)) != -2) {
     fprintf(2, "should returns error, because buffer is small\n");
+    free(plist);
     exit(-1);
   }
+  free(plist);
 
   exit(0);
 }
