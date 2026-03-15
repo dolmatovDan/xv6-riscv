@@ -30,12 +30,12 @@ main(int argc, char *argv[])
     fprintf(2, "ps_listinfo should write correctly\n");
     exit(-1);
   }
-  free(plist);
 
   struct procinfo *p = plist;
   for (int i = 0; i < cnt_proc; ++i) {
     printf("pid: (%d), name: (%s), ppid: (%d), pname: (%s), state: (%u)\n", p[i].pid, p[i].name, p[i].ppid, p[i].pname, p[i].state);
   }
+  free(plist);
 
   // test small buffer
   lim = 2;

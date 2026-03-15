@@ -98,23 +98,24 @@ uint64 sys_ps_listinfo(void) {
   argaddr(0, (uint64 *)&plist);
   argint(1, &lim);
 
-  struct proc *dst_p = myproc();
-
-  struct proc *p;
   int cnt_used = 0;
-  for (p = proc; p < &proc[NPROC]; ++p) {
-    acquire(&p->lock);
-    if (p->state != UNUSED) {
+  struct proc *p;
+
+  if (plist == 0) {
+    for (p = proc; p < &proc[NPROC]; ++p) {
+      acquire(&p->lock);
+      if (p->state == UNUSED) {
+        release(&p->lock);
+        continue;
+      }
       cnt_used++;
+      release(&p->lock);
     }
-    release(&p->lock);
+    return cnt_used;
   }
 
-  if (plist == 0)
-    return cnt_used;
+  struct proc *dst_p = myproc();
 
-  if (cnt_used > lim)
-    return -2;
 
   for (p = proc; p < &proc[NPROC]; ++p) {
     acquire(&p->lock);
@@ -122,18 +123,22 @@ uint64 sys_ps_listinfo(void) {
       release(&p->lock);
       continue;
     }
+    cnt_used++;
+    if (cnt_used > lim) {
+      release(&p->lock);
+      return -2;
+    }
+
     struct procinfo cur_proc_info;
     cur_proc_info.pid = p->pid;
     safestrcpy(cur_proc_info.name, p->name, 16);
     cur_proc_info.state = p->state;
-
-    struct proc* parent = p->parent;
     release(&p->lock);
 
     acquire(&wait_lock);
-    if (parent) {
-      cur_proc_info.ppid = parent->pid;
-      safestrcpy(cur_proc_info.pname, parent->name, 16);
+    if (p->parent) {
+      cur_proc_info.ppid = p->parent->pid;
+      safestrcpy(cur_proc_info.pname, p->parent->name, 16);
     } else {
       cur_proc_info.ppid = 0;
       safestrcpy(cur_proc_info.pname, "", 16);
