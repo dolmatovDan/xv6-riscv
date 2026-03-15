@@ -22,7 +22,7 @@ wrap_string(char *s, int n)
 int
 main(int argc, char *argv[])
 {
-  int lim = 1;
+  int lim = ps_listinfo(0, 0);
   struct procinfo *plist = malloc(lim * sizeof(*plist));
   int cnt_proc = -1;
   while (plist && ((cnt_proc = ps_listinfo(plist, lim)) == -2)) {
