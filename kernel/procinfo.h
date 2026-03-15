@@ -1,12 +1,9 @@
 #pragma once
-#include "kernel/param.h"
-#include "kernel/spinlock.h"
-#include "kernel/riscv.h"
 #include "kernel/proc.h"
 
 struct procinfo {
   int pid, ppid;
-  char *name;
-  char *pname;
+  char name[16];
+  char pname[16];
   enum procstate state;
 };

@@ -1,5 +1,5 @@
 #include "defs.h"
-#include "kernel/proc.h"
+#include "proc.h"
 #include "memlayout.h"
 #include "param.h"
 #include "procinfo.h"
@@ -98,6 +98,8 @@ uint64 sys_ps_listinfo(void) {
   argaddr(0, (uint64 *)&plist);
   argint(1, &lim);
 
+  struct proc *dst_p = myproc();
+
   struct proc *p;
   int cnt_used = 0;
   for (p = proc; p < &proc[NPROC]; ++p) {
@@ -107,11 +109,12 @@ uint64 sys_ps_listinfo(void) {
     }
     release(&p->lock);
   }
+
   if (plist == 0)
     return cnt_used;
 
   if (cnt_used > lim)
-    return -1;
+    return -2;
 
   for (p = proc; p < &proc[NPROC]; ++p) {
     acquire(&p->lock);
@@ -121,23 +124,27 @@ uint64 sys_ps_listinfo(void) {
     }
     struct procinfo cur_proc_info;
     cur_proc_info.pid = p->pid;
-    cur_proc_info.name = p->name;
+    safestrcpy(cur_proc_info.name, p->name, 16);
     cur_proc_info.state = p->state;
 
     acquire(&wait_lock);
-    cur_proc_info.ppid = p->parent->pid;
-    cur_proc_info.pname = p->parent->name;
+    if (p->parent) {
+      cur_proc_info.ppid = p->parent->pid;
+      safestrcpy(cur_proc_info.pname, p->parent->name, 16);
+    } else {
+      cur_proc_info.ppid = 0;
+      safestrcpy(cur_proc_info.pname, "", 16);
+    }
     release(&wait_lock);
+    release(&p->lock);
 
-    int err = copyout(p->pagetable, (uint64)plist, (char *)&cur_proc_info,
+    int err = copyout(dst_p->pagetable, (uint64)plist, (char *)&cur_proc_info,
                       sizeof(cur_proc_info));
     if (err != 0) {
-      release(&p->lock);
       return -1;
     }
-    plist += sizeof(cur_proc_info);
 
-    release(&p->lock);
+    plist++;
   }
 
   return cnt_used;
