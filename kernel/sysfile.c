@@ -533,7 +533,18 @@ sys_mutex_lock(void)
     return -1;
   }
 
-  acquiresleep(p->ofile[fd]->lock);
+  struct sleeplock *lk = p->ofile[fd]->lock;
+  acquire(&lk->lk);
+  while (lk->locked) {
+    if (killed(p)) {
+      release(&lk->lk);
+      return -1;
+    }
+    sleep(lk, &lk->lk);
+  }
+  lk->locked = 1;
+  lk->pid = p->pid;
+  release(&lk->lk);
 
   return 0;
 }
