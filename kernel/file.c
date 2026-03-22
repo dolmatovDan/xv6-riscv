@@ -12,6 +12,7 @@
 #include "file.h"
 #include "stat.h"
 #include "proc.h"
+#include "mutex.h"
 
 struct devsw devsw[NDEV];
 struct {
@@ -65,6 +66,11 @@ fileclose(struct file *f)
   if(f->ref < 1)
     panic("fileclose");
   if(--f->ref > 0){
+    if (f->type == FD_MUTEX) {
+      if (f->lock->pid == myproc()->pid) {
+        releasesleep(f->lock);
+      }
+    }
     release(&ftable.lock);
     return;
   }
@@ -79,6 +85,8 @@ fileclose(struct file *f)
     begin_op();
     iput(ff.ip);
     end_op();
+  } else if (ff.type == FD_MUTEX) {
+    mutexclose(f);
   }
 }
 
@@ -108,6 +116,9 @@ fileread(struct file *f, uint64 addr, int n)
 {
   int r = 0;
 
+  if (f->type == FD_MUTEX)
+    return -1;
+
   if(f->readable == 0)
     return -1;
 
@@ -135,6 +146,9 @@ int
 filewrite(struct file *f, uint64 addr, int n)
 {
   int r, ret = 0;
+
+  if (f->type == FD_MUTEX)
+    return -1;
 
   if(f->writable == 0)
     return -1;
