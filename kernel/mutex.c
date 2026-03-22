@@ -16,14 +16,14 @@ mutexalloc(struct file **f)
   }
 
   if (((*f)->lock = (struct sleeplock*)kalloc()) == 0) {
-    printf("fail to kalloc sleeplock\n");
+    printf("[KERNEL] fail to kalloc sleeplock\n");
     goto bad;
   }
 
   (*f)->type = FD_MUTEX;
 
-  printf("allocating mutex\n");
   initsleeplock((*f)->lock, "mutex lock");
+  printf("[KERNEL] allocating mutex\n");
 
   return 0;
 
@@ -38,8 +38,8 @@ mutexalloc(struct file **f)
 int
 mutexclose(struct file *f)
 {
-  printf("closing mutex\n");
+  printf("[KERNEL] closing mutex\n");
   kfree((char*)(f->lock));
-  printf("free mutex succesfully\n");
+  printf("[KERNEL] free mutex succesfully\n");
   return 0;
 }

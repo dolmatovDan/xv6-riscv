@@ -525,11 +525,11 @@ sys_mutex(void)
 uint64
 sys_mutex_lock(void)
 {
-  int fd;
-  argint(0, &fd);
-
   struct proc *p = myproc();
-  if (fd < 0 || p->ofile[fd] == 0 || p->ofile[fd]->type != FD_MUTEX) {
+  int fd;
+  argfd(0, &fd, 0);
+
+  if (fd == -1 || p->ofile[fd]->type != FD_MUTEX) {
     return -1;
   }
 
@@ -541,11 +541,11 @@ sys_mutex_lock(void)
 uint64
 sys_mutex_unlock(void)
 {
-  int fd;
-  argint(0, &fd);
-
   struct proc *p = myproc();
-  if (fd < 0 || p->ofile[fd] == 0 || p->ofile[fd]->type != FD_MUTEX || p->ofile[fd]->lock->pid != p->pid)
+  int fd;
+  argfd(0, &fd, 0);
+
+  if (fd == -1 || p->ofile[fd]->type != FD_MUTEX || p->ofile[fd]->lock->pid != p->pid)
     return -1;
 
   releasesleep(p->ofile[fd]->lock);
