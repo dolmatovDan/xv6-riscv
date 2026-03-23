@@ -19,6 +19,25 @@ wrap_string(char *s, int n)
   return ret;
 }
 
+char* get_text_state(int state) {
+  switch (state) {
+  case 0:
+    return "  UNUSED";
+  case 1:
+    return "    USED";
+  case 2:
+    return "SLEEPING";
+  case 3:
+    return "RUNNABLE";
+  case 4:
+    return " RUNNING";
+  case 5:
+    return "  ZOMBIE";
+  }
+
+  return "";
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -37,11 +56,12 @@ main(int argc, char *argv[])
   }
 
   printf("cnt_proc: %d\n", cnt_proc);
-  printf("     PID     NAME     STATE     PPID      PNAME\n");
+  printf("     PID     NAME            STATE     PPID      PNAME\n");
+  printf("------------------------------------------------------\n");
   for (struct procinfo *p = plist; p < plist + cnt_proc; ++p) {
     char* wrapped_name = wrap_string(p->name, 6);
     char* wrapped_pname = wrap_string(p->pname, 6);
-    printf("       %d   %s         %d        %d     %s\n", p->pid, wrapped_name, p->state, p->ppid, wrapped_pname);
+    printf("       %d   %s         %s        %d     %s\n", p->pid, wrapped_name, get_text_state(p->state), p->ppid, wrapped_pname);
 
     if (p->pname != wrapped_pname)
       free(wrapped_pname);
