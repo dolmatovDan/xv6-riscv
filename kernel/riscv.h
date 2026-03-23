@@ -1,4 +1,6 @@
+#pragma once
 #ifndef __ASSEMBLER__
+#include "kernel/types.h"
 
 // which hart (core) is this?
 static inline uint64
