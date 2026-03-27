@@ -8,6 +8,7 @@
 #include "kernel/file.h"
 #include "user/user.h"
 #include "kernel/fcntl.h"
+#include "kernel/testdriver.h"
 
 char *argv[] = { "sh", 0 };
 
@@ -22,6 +23,11 @@ main(void)
   }
   dup(0);  // stdout
   dup(0);  // stderr
+
+  mknod("null", TESTDRIVER, TD_NULL);
+  mknod("zero", TESTDRIVER, TD_ZERO);
+  mknod("urandom", TESTDRIVER, TD_URANDOM);
+  mknod("nullstat", TESTDRIVER, TD_NULLSTAT);
 
   for(;;){
     printf("init: starting sh\n");
