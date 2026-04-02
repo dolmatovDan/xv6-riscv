@@ -5,6 +5,7 @@
 int
 main(int argc, char *argv[])
 {
+  // test pte syscall
   pte();
   exit(0);
 }
