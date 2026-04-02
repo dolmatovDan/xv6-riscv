@@ -107,3 +107,12 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64
+sys_pte(void)
+{
+  struct proc *p = myproc();
+  pagetable_t pt = p->pagetable;
+  vmprint(pt, 0);
+  return 0;
+}

@@ -484,3 +484,54 @@ ismapped(pagetable_t pagetable, uint64 va)
   }
   return 0;
 }
+
+static void
+printhex(uint64 x, int n)
+{
+  char buf[16];
+  for (int i = n - 1; i >= 0; i--) {
+    int d = x & 0xF;
+    buf[i] = d < 10 ? '0' + d : 'A' + d - 10;
+    x >>= 4;
+  }
+  printf("0x");
+  for (int i = 0; i < n; i++)
+    printf("%c", buf[i]);
+}
+
+void
+vmprint(pagetable_t pt, int lvl)
+{
+  if (lvl == 0) {
+    printf("PAGETABLE ");
+    printhex((uint64)pt, 16);
+    printf("\n");
+  }
+
+  for (int i = 0; i < 512; ++i) {
+    pte_t pte = pt[i];
+    if (!(pte & PTE_V)) {
+      continue;
+    }
+    for (int j = 0; j < 9 * lvl; ++j) {
+      printf(".");
+    }
+    if (lvl > 0)
+      printf(" ");
+    printhex(i, 3);
+    printf(" -> ");
+    printhex(PTE2PA(pte), 16);
+    printf(" ");
+    printf(PTE_W & pte ? "W" : "_");
+    printf(PTE_R & pte ? "R" : "_");
+    printf(PTE_X & pte ? "X" : "_");
+    printf(PTE_U & pte ? "U" : "_");
+    printf(PTE_G & pte ? "G" : "_");
+    printf(PTE_A & pte ? "A" : "_");
+    printf(PTE_D & pte ? "D" : "_");
+    printf("\n");
+    if (lvl < 2) {
+      vmprint((pagetable_t)PTE2PA(pte), lvl + 1);
+    }
+  }
+}
