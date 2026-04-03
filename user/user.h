@@ -25,6 +25,8 @@ char* sys_sbrk(int,int);
 int pause(int);
 int uptime(void);
 int pte(void);
+int change_flag(const void*, int len, int mask);
+int check_flag(const void*, int len, int mask);
 
 // ulib.c
 int stat(const char*, struct stat*);

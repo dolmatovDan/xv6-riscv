@@ -133,16 +133,13 @@ sys_change_flag(void)
     return -1;
   }
 
-  uint64 va, pa;
+  uint64 va;
   int n;
 
   while (len > 0) {
     va = PGROUNDDOWN(buf);
     pte_t *pte = walk(pt, va, 0);
     if (pte == 0 || !(*pte & PTE_V) || !(*pte & PTE_U))
-      return -1;
-    pa = PTE2PA(*pte);
-    if (pa == 0)
       return -1;
     n = PGSIZE - (buf - va);
     if (n > len) n = len;
@@ -153,4 +150,41 @@ sys_change_flag(void)
   sfence_vma();
 
   return 0;
+}
+
+uint64
+sys_check_flag(void)
+{
+  uint64 buf, len, mask;
+  pagetable_t pt = myproc()->pagetable;
+  argaddr(0, &buf);
+  argaddr(1, &len);
+  argint(2, (int*)&mask);
+
+  if (mask >> 8) {
+    return -1;
+  }
+
+  uint64 va;
+  int n;
+
+  int ans = 0;
+
+  while (len > 0) {
+    va = PGROUNDDOWN(buf);
+    pte_t *pte = walk(pt, va, 0);
+    if (!pte || !(*pte & PTE_V) || !(*pte & PTE_U))
+      return -1;
+
+    if (*pte & mask) {
+      ans = 1;
+    }
+
+    n = PGSIZE - (buf - va);
+    if (n > len) n = len;
+    buf += n;
+    len -= n;
+  }
+
+  return ans;
 }
