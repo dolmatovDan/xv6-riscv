@@ -8,14 +8,24 @@ int
 main(int argc, char *argv[])
 {
   // test pte syscall
+  printf("[INFO] Initial pte\n");
   pte();
 
+  printf("[INFO] Allocate buffers\n");
   char buf1[512];
   (void)buf1;
-  char *buf2 = malloc(16 * 1024);
+
+  int N = 16 * 1024;
+  char *buf2 = malloc(N);
   pte();
 
+  printf("[INFO] Set AD to 0\n");
   int err = change_flag(buf1, sizeof(buf1), 0b11000000);
+  if (err == -1) {
+    fprintf(2, "fail to change flag\n");
+    exit(-1);
+  }
+  err = change_flag(buf2, N, 0b11000000);
   if (err == -1) {
     fprintf(2, "fail to change flag\n");
     exit(-1);
@@ -23,5 +33,8 @@ main(int argc, char *argv[])
   pte();
 
   free(buf2);
+  printf("[INFO] Print after free\n");
+  pte();
+
   exit(0);
 }
