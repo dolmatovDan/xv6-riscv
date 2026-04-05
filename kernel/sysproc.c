@@ -107,3 +107,87 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64
+sys_pte(void)
+{
+  struct proc *p = myproc();
+  vmprint(p->pagetable, 0);
+  return 0;
+}
+
+uint64
+sys_change_flag(void)
+{
+  uint64 buf;
+  int len;
+  int mask;
+  pagetable_t pt = myproc()->pagetable;
+  argaddr(0, &buf);
+  argint(1, &len);
+  argint(2, &mask);
+
+  if (mask >> 8) {
+    return -1;
+  }
+
+  if (mask & ~(PTE_D | PTE_A)) {
+    return -1;
+  }
+
+  uint64 va;
+  int n;
+
+  while (len > 0) {
+    va = PGROUNDDOWN(buf);
+    pte_t *pte = walk(pt, va, 0);
+    if (pte == 0 || !(*pte & PTE_V) || !(*pte & PTE_U))
+      return -1;
+    n = PGSIZE - (buf - va);
+    if (n > len) n = len;
+    buf += n;
+    len -= n;
+    *pte &= ~mask;
+  }
+  sfence_vma();
+
+  return 0;
+}
+
+uint64
+sys_check_flag(void)
+{
+  uint64 buf;
+  int len, mask;
+  pagetable_t pt = myproc()->pagetable;
+  argaddr(0, &buf);
+  argint(1, &len);
+  argint(2, &mask);
+
+  if (mask >> 8) {
+    return -1;
+  }
+
+  uint64 va;
+  int n;
+
+  int ans = 0;
+
+  while (len > 0) {
+    va = PGROUNDDOWN(buf);
+    pte_t *pte = walk(pt, va, 0);
+    if (!pte || !(*pte & PTE_V) || !(*pte & PTE_U))
+      return -1;
+
+    if (*pte & mask) {
+      ans = 1;
+    }
+
+    n = PGSIZE - (buf - va);
+    if (n > len) n = len;
+    buf += n;
+    len -= n;
+  }
+
+  return ans;
+}
