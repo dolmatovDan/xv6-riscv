@@ -119,11 +119,12 @@ sys_pte(void)
 uint64
 sys_change_flag(void)
 {
-  uint64 buf, len;
+  uint64 buf;
+  int len;
   int mask;
   pagetable_t pt = myproc()->pagetable;
   argaddr(0, &buf);
-  argaddr(1, &len);
+  argint(1, &len);
   argint(2, &mask);
 
   if (mask >> 8) {
