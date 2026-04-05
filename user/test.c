@@ -1,5 +1,6 @@
 #include "kernel/types.h"
 #include "kernel/stat.h"
+#include "kernel/riscv.h"
 #include "user/user.h"
 
 int glob = 1;
@@ -31,6 +32,26 @@ main(int argc, char *argv[])
     exit(-1);
   }
   pte();
+
+  // test check_flag on glob
+  change_flag(&glob, sizeof(glob), PTE_A | PTE_D);
+  int tmp = glob; (void)tmp;
+  printf("[INFO] glob after read: A=%d D=%d\n", check_flag(&glob, sizeof(glob), PTE_A), check_flag(&glob, sizeof(glob), PTE_D));
+  glob = 2;
+  printf("[INFO] glob after write: A=%d D=%d\n", check_flag(&glob, sizeof(glob), PTE_A), check_flag(&glob, sizeof(glob), PTE_D));
+
+  // test single stack var
+  int x = 5;
+  err = change_flag(&x, sizeof(x), PTE_A | PTE_D);
+  if (err != -1) {
+    fprintf(2, "fail to change flag\n");
+    exit(-1);
+  }
+  tmp = x;
+  (void)tmp;
+  printf("[INFO] x after read: A=%d D=%d\n", check_flag(&x, sizeof(x), PTE_A), check_flag(&x, sizeof(x), PTE_D));
+  x = 10;
+  printf("[INFO] x after write: A=%d D=%d\n", check_flag(&x, sizeof(x), PTE_A), check_flag(&x, sizeof(x), PTE_D));
 
   free(buf2);
   printf("[INFO] Print after free\n");

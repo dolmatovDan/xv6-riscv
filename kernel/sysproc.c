@@ -157,11 +157,12 @@ sys_change_flag(void)
 uint64
 sys_check_flag(void)
 {
-  uint64 buf, len, mask;
+  uint64 buf;
+  int len, mask;
   pagetable_t pt = myproc()->pagetable;
   argaddr(0, &buf);
-  argaddr(1, &len);
-  argint(2, (int*)&mask);
+  argint(1, &len);
+  argint(2, &mask);
 
   if (mask >> 8) {
     return -1;
