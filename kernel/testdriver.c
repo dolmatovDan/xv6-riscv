@@ -30,7 +30,8 @@ int
 testdriverread(int user_dst, uint64 dst, int n, int minor)
 {
   uint64 cnt, r = 0;
-  char buf[32] = {0};
+
+  static char buf[32] = {0};
 
   switch (minor) {
   case TD_NULL:
