@@ -556,7 +556,7 @@ sys_mutex_unlock(void)
   int fd;
   argfd(0, &fd, 0);
 
-  if (fd == -1 || p->ofile[fd]->type != FD_MUTEX || p->ofile[fd]->lock->pid != p->pid)
+  if (fd == -1 || p->ofile[fd]->type != FD_MUTEX || !holdingsleep(p->ofile[fd]->lock))
     return -1;
 
   releasesleep(p->ofile[fd]->lock);

@@ -65,12 +65,13 @@ fileclose(struct file *f)
   acquire(&ftable.lock);
   if(f->ref < 1)
     panic("fileclose");
+  int should_release = (f->type == FD_MUTEX && holdingsleep(f->lock));
+  struct sleeplock *lk = f->lock;
+
   if(--f->ref > 0) {
-    int should_release = (f->type == FD_MUTEX && f->lock->pid == myproc()->pid);
-    struct sleeplock *lk = f->lock;
     release(&ftable.lock);
     if (should_release)
-        releasesleep(lk);
+      releasesleep(lk);
     return;
   }
   ff = *f;
@@ -85,9 +86,8 @@ fileclose(struct file *f)
     iput(ff.ip);
     end_op();
   } else if (ff.type == FD_MUTEX) {
-    int should_release = (ff.type == FD_MUTEX && ff.lock->pid == myproc()->pid);
     if (should_release)
-        releasesleep(ff.lock);
+      releasesleep(ff.lock);
     mutexclose(&ff);
   }
 }
