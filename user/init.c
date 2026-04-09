@@ -8,6 +8,7 @@
 #include "kernel/file.h"
 #include "user/user.h"
 #include "kernel/fcntl.h"
+#include "kernel/testdriver.h"
 
 char *argv[] = { "sh", 0 };
 
@@ -22,6 +23,20 @@ main(void)
   }
   dup(0);  // stdout
   dup(0);  // stderr
+
+  struct stat st;
+  if (stat("null", &st) < 0) {
+    mknod("null", TESTDRIVER, TD_NULL);
+  }
+  if (stat("zero", &st) < 0) {
+    mknod("zero", TESTDRIVER, TD_ZERO);
+  }
+  if (stat("urandom", &st) < 0) {
+    mknod("urandom", TESTDRIVER, TD_URANDOM);
+  }
+  if (stat("nullstat", &st) < 0) {
+    mknod("nullstat", TESTDRIVER, TD_NULLSTAT);
+  }
 
   for(;;){
     printf("init: starting sh\n");
