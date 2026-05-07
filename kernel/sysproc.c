@@ -107,3 +107,23 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64
+sys_setlog(void)
+{
+  int classes, nticks;
+  argint(0, &classes);
+  argint(1, &nticks);
+  setlog_kernel(classes, nticks);
+  return 0;
+}
+
+uint64
+sys_dmesg(void)
+{
+  uint64 p;
+  int n;
+  argaddr(0, &p);
+  argint(1, &n);
+  return diagbuf_copyout(myproc()->pagetable, p, n);
+}

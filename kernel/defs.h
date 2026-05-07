@@ -1,3 +1,5 @@
+#include <stdarg.h>
+
 struct buf;
 struct context;
 struct file;
@@ -74,6 +76,7 @@ int             pipewrite(struct pipe*, uint64, int);
 
 // printf.c
 int             printf(char*, ...) __attribute__ ((format (printf, 1, 2)));
+void            vprintf_to(void (*)(int), char*, va_list);
 void            panic(char*) __attribute__((noreturn));
 void            printfinit(void);
 
@@ -183,3 +186,13 @@ void            virtio_disk_intr(void);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
+
+// diagbuf.c
+void            diagbuf_init(void);
+void            pr_msg(const char*, ...);
+int             diagbuf_copyout(pagetable_t, uint64, int);
+
+// log_events.c
+void            loginit(void);
+void            setlog_kernel(int, int);
+int             should_log(int);
