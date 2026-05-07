@@ -120,7 +120,6 @@ vprintf_to(void (*putch)(int), char *fmt, va_list ap)
   }
 }
 
-// Print to the console.
 int
 printf(char *fmt, ...)
 {
