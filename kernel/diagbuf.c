@@ -8,7 +8,7 @@
 
 static struct {
   struct spinlock lock;
-  char buf[BUFPAGES * PGSIZE];
+  char buf[BUFSIZE];
   int head, tail;
 } db;
 
@@ -16,7 +16,7 @@ void
 diagbuf_init()
 {
   initlock(&db.lock, "diagbuf lock");
-  db.head = db.tail = 0;
+  db.head = 0;
   db.buf[0] = '\n';
   db.tail = 1;
 }
@@ -25,7 +25,7 @@ diagbuf_init()
 void
 diagbuf_write(int byte)
 {
-  int size = BUFPAGES * PGSIZE;
+  int size = BUFSIZE;
   if (db.tail - db.head == size)
     db.head++;
   db.buf[db.tail % size] = byte;
@@ -40,7 +40,7 @@ diagbuf_copyout(pagetable_t pt, uint64 dst, int n)
 
   acquire(&db.lock);
 
-  int size = BUFPAGES * PGSIZE;
+  int size = BUFSIZE;
   int start = db.head;
   int end = db.tail;
   int len = end - start;
