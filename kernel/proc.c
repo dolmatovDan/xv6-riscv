@@ -5,6 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#include "log_events.h"
 
 struct cpu cpus[NCPU];
 
@@ -302,6 +303,9 @@ kfork(void)
   np->state = RUNNABLE;
   release(&np->lock);
 
+  if(should_log(LOG_PROC))
+    pr_msg("fork parent=%d (%s) child=%d", p->pid, p->name, pid);
+
   return pid;
 }
 
@@ -344,6 +348,10 @@ kexit(int status)
   iput(p->cwd);
   end_op();
   p->cwd = 0;
+
+  if(should_log(LOG_PROC))
+    pr_msg("exit pid=%d (%s) status=%d parent=%d",
+      p->pid, p->name, status, p->parent ? p->parent->pid : -1);
 
   acquire(&wait_lock);
 

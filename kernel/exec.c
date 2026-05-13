@@ -6,6 +6,7 @@
 #include "proc.h"
 #include "defs.h"
 #include "elf.h"
+#include "log_events.h"
 
 static int loadseg(pde_t *, uint64, struct inode *, uint, uint);
 
@@ -127,6 +128,9 @@ kexec(char *path, char **argv)
       last = s+1;
   safestrcpy(p->name, last, sizeof(p->name));
     
+  if(should_log(LOG_EXEC))
+    pr_msg("exec pid=%d path=%s", p->pid, path);
+
   // Commit to the user image.
   oldpagetable = p->pagetable;
   p->pagetable = pagetable;
