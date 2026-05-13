@@ -139,7 +139,7 @@ static void run_loop(Stats *s) {
             if (flag_sigterm || flag_sigint) break;
         }
 
-        if (flag_sigterm || flag_sigint) break;
+        if (flag_sigterm) break;
 
         char buf[BUF_SIZE];
         int last_newline = 1;
