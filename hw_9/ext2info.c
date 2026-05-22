@@ -71,11 +71,9 @@ main(int argc, char *argv[])
     printf("Size:        %llu\n", (unsigned long long)size);
     printf("Links:       %u\n", le16(ino.i_links_count));
     printf("Blocks:      %u  (512B units)\n", le32(ino.i_blocks));
-    printf("Flags:       0x%08x\n", le32(ino.i_flags));
     printf("atime:       "); fmt_time(le32(ino.i_atime)); printf("\n");
-    printf("ctime:       "); fmt_time(le32(ino.i_ctime)); printf("\n");
     printf("mtime:       "); fmt_time(le32(ino.i_mtime)); printf("\n");
-    printf("dtime:       "); fmt_time(le32(ino.i_dtime)); printf("\n");
+    printf("ctime:       "); fmt_time(le32(ino.i_ctime)); printf("\n");
 
     uint8_t *buf = malloc(e.block_size);
 
